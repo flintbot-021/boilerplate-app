@@ -1,5 +1,3 @@
-This is the Run Version
-
 # Next.js Boilerplate with Supabase, Tailwind, and Essential SaaS Tools
 
 A production-ready Next.js boilerplate featuring authentication, organization structure, and essential SaaS integrations.
