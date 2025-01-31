@@ -63,7 +63,6 @@ export default function AuthCallbackPage() {
           }
         }
 
-        console.log('Getting user...')
         // Get user
         const { data: { user }, error: userError } = await supabase.auth.getUser()
         if (userError) {
@@ -116,7 +115,7 @@ export default function AuthCallbackPage() {
         if (pendingOrgName) {
           console.log('Creating organization...')
           try {
-            // First create the organization without select
+            // First create the organization
             const { error: orgError, data: orgData } = await supabase
               .from('organizations')
               .insert({
@@ -124,6 +123,7 @@ export default function AuthCallbackPage() {
                 slug: pendingOrgName.toLowerCase().replace(/\s+/g, '-'),
               })
               .select()
+              .single()
 
             if (orgError) {
               console.error('Organization creation error:', {
@@ -135,19 +135,18 @@ export default function AuthCallbackPage() {
               throw orgError
             }
 
-            if (!orgData || orgData.length === 0) {
+            if (!orgData) {
               console.error('No organization data returned')
               throw new Error('Failed to create organization')
             }
 
-            const org = Array.isArray(orgData) ? orgData[0] : orgData
-            console.log('Organization created:', org)
+            console.log('Organization created:', orgData)
 
             // Then create the owner membership
-            const { error: memberError, data: memberData } = await supabase
+            const { error: memberError } = await supabase
               .from('organization_members')
               .insert({
-                organization_id: org.id,
+                organization_id: orgData.id,
                 user_id: user.id,
                 role: 'owner',
               })
@@ -163,7 +162,7 @@ export default function AuthCallbackPage() {
               throw memberError
             }
 
-            console.log('Organization membership created:', memberData)
+            console.log('Organization membership created')
             localStorage.removeItem('pendingOrgName')
           } catch (orgError: any) {
             console.error('Organization setup failed:', {
@@ -177,14 +176,19 @@ export default function AuthCallbackPage() {
           }
         }
 
+        // Show success message
         toast({
           title: 'Success',
           description: 'Authentication successful.',
         })
 
-        // Redirect to dashboard with correct path
+        // Wait for session to be fully set
+        console.log('Waiting for session to settle...')
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        // Use window.location for a full page reload
         console.log('Redirecting to dashboard...')
-        router.push('/dashboard')
+        window.location.href = '/dashboard'
       } catch (error) {
         console.error('Auth callback error:', {
           error,
@@ -203,7 +207,7 @@ export default function AuthCallbackPage() {
     }
 
     handleCallback()
-  }, [searchParams])
+  }, [searchParams, router, toast, supabase])
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">

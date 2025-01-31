@@ -46,24 +46,27 @@ export function SignUpForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true)
-      console.log('Starting sign up process with values:', {
-        email: values.email,
-        fullName: values.fullName,
-        organizationName: values.organizationName
-      })
+      console.log('🚀 Starting sign up process...')
       
       // Store organization name in localStorage for after verification
       localStorage.setItem('pendingOrgName', values.organizationName)
       
       if (isDevelopment) {
-        // In development, use sign in with email (no verification needed)
-        const { error: signInError, data } = await supabase.auth.signInWithPassword({
+        // Try to sign in first
+        console.log('📝 Attempting to sign in...')
+        const { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
           email: values.email,
           password: values.password,
         })
 
         if (signInError) {
-          // If sign in fails, it means user doesn't exist, so create them
+          console.log('❌ Sign in failed:', {
+            error: signInError.message,
+            code: signInError.status
+          })
+          console.log('📝 Creating new user...')
+          
+          // Create new user
           const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
             email: values.email,
             password: values.password,
@@ -71,19 +74,30 @@ export function SignUpForm() {
               data: {
                 full_name: values.fullName,
               },
-              emailRedirectTo: undefined, // Disable email verification
+              emailRedirectTo: undefined,
             },
           })
 
           if (signUpError) {
+            console.log('❌ Sign up error:', {
+              message: signUpError.message,
+              status: signUpError.status
+            })
             throw signUpError
           }
 
           if (!signUpData.user) {
-            throw new Error('No user data returned')
+            console.log('❌ No user data returned from sign up')
+            throw new Error('No user data returned from sign up')
           }
 
-          // Create profile manually since trigger might not fire without email verification
+          console.log('✅ User created:', {
+            id: signUpData.user.id,
+            email: signUpData.user.email
+          })
+
+          // Create profile
+          console.log('📝 Creating profile...')
           const { error: profileError } = await supabase
             .from('profiles')
             .insert({
@@ -92,10 +106,18 @@ export function SignUpForm() {
             })
 
           if (profileError) {
-            console.error('Error creating profile:', profileError)
+            console.log('❌ Profile creation error:', {
+              message: profileError.message,
+              code: profileError.code,
+              details: profileError.details
+            })
+            throw profileError
           }
 
+          console.log('✅ Profile created')
+
           // Create organization
+          console.log('📝 Creating organization...')
           const { error: orgError, data: orgData } = await supabase
             .from('organizations')
             .insert({
@@ -106,21 +128,97 @@ export function SignUpForm() {
             .single()
 
           if (orgError) {
-            console.error('Error creating organization:', orgError)
-          } else if (orgData) {
-            // Create organization membership
-            await supabase
-              .from('organization_members')
-              .insert({
-                organization_id: orgData.id,
-                user_id: signUpData.user.id,
-                role: 'owner',
-              })
+            console.log('❌ Organization creation error:', {
+              message: orgError.message,
+              code: orgError.code,
+              details: orgError.details
+            })
+            throw orgError
           }
+
+          if (!orgData) {
+            console.log('❌ No organization data returned')
+            throw new Error('No organization data returned')
+          }
+
+          console.log('✅ Organization created:', {
+            id: orgData.id,
+            name: orgData.name
+          })
+
+          // Create organization membership
+          console.log('📝 Creating organization membership...')
+          const { error: memberError } = await supabase
+            .from('organization_members')
+            .insert({
+              organization_id: orgData.id,
+              user_id: signUpData.user.id,
+              role: 'owner',
+            })
+
+          if (memberError) {
+            console.log('❌ Organization membership error:', {
+              message: memberError.message,
+              code: memberError.code,
+              details: memberError.details
+            })
+            throw memberError
+          }
+
+          console.log('✅ Organization membership created')
+
+          // Final sign in
+          console.log('📝 Performing final sign in...')
+          const { error: finalSignInError } = await supabase.auth.signInWithPassword({
+            email: values.email,
+            password: values.password,
+          })
+
+          if (finalSignInError) {
+            console.log('❌ Final sign in error:', {
+              message: finalSignInError.message,
+              status: finalSignInError.status
+            })
+            throw finalSignInError
+          }
+
+          console.log('✅ Final sign in successful')
         }
 
-        // Redirect to dashboard
-        router.push('/dashboard')
+        // Cleanup and redirect
+        localStorage.removeItem('pendingOrgName')
+        
+        console.log('📝 Getting current session...')
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          console.log('❌ Session error:', {
+            message: sessionError.message,
+            status: sessionError.status
+          })
+          throw sessionError
+        }
+
+        if (!session) {
+          console.log('❌ No session found after sign in')
+          throw new Error('No session found after sign in')
+        }
+
+        console.log('✅ Session confirmed:', {
+          user: session.user.id,
+          expires: session.expires_at
+        })
+
+        toast({
+          title: 'Success',
+          description: 'Account created successfully.',
+        })
+
+        console.log('⏳ Waiting for session to settle...')
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        console.log('🚀 Redirecting to dashboard...')
+        window.location.href = '/dashboard'
       } else {
         // In production, use normal signup flow with email verification
         const { error: signUpError, data } = await supabase.auth.signUp({
@@ -150,13 +248,16 @@ export function SignUpForm() {
       }
       
     } catch (error: any) {
-      console.error('Sign up process failed:', {
-        error,
+      console.log('❌ SIGNUP PROCESS FAILED:', {
         message: error?.message,
+        code: error?.code,
         details: error?.details,
         hint: error?.hint,
-        code: error?.code
+        status: error?.status,
+        name: error?.name,
+        stack: error?.stack
       })
+      
       toast({
         title: 'Error',
         description: error?.message || 'Something went wrong. Please try again.',
