@@ -1,0 +1,18 @@
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://wkpludwacfgzfppeeceu.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndrcGx1ZHdhY2ZnemZwcGVlY2V1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgzMjIyOTYsImV4cCI6MjA1Mzg5ODI5Nn0.Q4iFyHC9-JB-YWd7PRu-X_dFW8cT8swrUUydvMWwwWU
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndrcGx1ZHdhY2ZnemZwcGVlY2V1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczODMyMjI5NiwiZXhwIjoyMDUzODk4Mjk2fQ.JEQEiXocFb1vbBjCw5KexQP05Wq6_Qop1hzknXmDSC8
+
+# Email Configuration (Resend)
+RESEND_API_KEY=your-resend-api-key
+
+# Analytics Configuration (PostHog)
+#NEXT_PUBLIC_POSTHOG_KEY=your-posthog-key
+#NEXT_PUBLIC_POSTHOG_HOST=your-posthog-host
+
+# OpenAI Configuration
+OPENAI_API_KEY=your-openai-api-key
+
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_NAME="Next.js Boilerplate" 

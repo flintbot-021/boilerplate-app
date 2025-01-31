@@ -23,6 +23,54 @@ A production-ready Next.js boilerplate featuring authentication, organization st
 - [OpenAI](https://openai.com)
 - [Vercel](https://vercel.com)
 
+## Dependencies
+
+### Core Dependencies
+```bash
+npm install next@latest react@latest react-dom@latest
+```
+
+### Authentication & Database
+```bash
+npm install @supabase/auth-helpers-nextjs @supabase/supabase-js
+```
+
+### UI & Components
+```bash
+npm install @radix-ui/react-avatar @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label @radix-ui/react-slot @radix-ui/react-toast
+npm install class-variance-authority clsx tailwind-merge tailwindcss-animate
+npm install lucide-react
+```
+
+### Forms & Validation
+```bash
+npm install @hookform/resolvers react-hook-form zod
+```
+
+### Styling
+```bash
+npm install tailwindcss postcss autoprefixer
+npm install @tailwindcss/typography
+```
+
+### Development Dependencies
+```bash
+npm install -D typescript @types/node @types/react @types/react-dom eslint eslint-config-next
+npm install -D prettier prettier-plugin-tailwindcss
+```
+
+### Optional Integrations
+```bash
+npm install @resend/node resend # For email functionality
+npm install posthog-js # For analytics
+npm install openai # For AI integration
+```
+
+### Complete Installation Command
+```bash
+npm install next@latest react@latest react-dom@latest @supabase/auth-helpers-nextjs @supabase/supabase-js @radix-ui/react-avatar @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label @radix-ui/react-slot @radix-ui/react-toast class-variance-authority clsx tailwind-merge tailwindcss-animate lucide-react @hookform/resolvers react-hook-form zod tailwindcss postcss autoprefixer @tailwindcss/typography @resend/node resend posthog-js openai && npm install -D typescript @types/node @types/react @types/react-dom eslint eslint-config-next prettier prettier-plugin-tailwindcss
+```
+
 ## Getting Started
 
 ### Prerequisites
