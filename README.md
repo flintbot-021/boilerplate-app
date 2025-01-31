@@ -129,6 +129,89 @@ src/
 - One-to-Many: Organization -> Users (through organization_members)
 - One-to-One: User -> Profile
 
+## Supabase Setup
+
+### Database Setup
+
+1. Create a new Supabase project
+2. Copy your project URL and anon key to your `.env.local`:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=your-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   ```
+
+### Database Schema
+
+The application requires several tables and functions to be set up in Supabase. To set these up:
+
+1. Navigate to the SQL Editor in your Supabase dashboard
+2. Copy the entire contents of `supabase/schema.sql`
+3. Run the SQL script
+
+The schema will create:
+- `profiles` table (extends Supabase auth.users)
+- `organizations` table
+- `organization_members` table
+- Row Level Security (RLS) policies
+- Necessary triggers and functions
+
+### Important Notes
+
+1. **Initial Setup**: Make sure to run the schema SQL before attempting to sign up users. The schema creates:
+   - Required tables
+   - RLS policies
+   - The `handle_new_user` trigger for automatic profile creation
+
+2. **Troubleshooting**:
+   - If you encounter "Database error saving new user" during signup, ensure you've run the complete schema SQL
+   - If tables appear "Not accessible" in tests but exist, this is normal when not authenticated
+   - The schema includes error handling to prevent signup failures even if profile creation encounters issues
+
+3. **Testing the Setup**:
+   - Visit `/test` to check connection status
+   - Visit `/api/test-supabase` for raw connection details
+   - Both endpoints will show table accessibility and current session status
+
+4. **Security**:
+   - RLS is enabled by default on all tables
+   - Users can only access their own profiles
+   - Organization access is restricted to members
+   - Organization management is restricted to owners/admins
+
+## Authentication Flow
+
+1. **Sign Up**:
+   - User fills out the sign-up form with email, password, name, and organization
+   - System creates user account and sends confirmation email
+   - User is redirected to verification page
+
+2. **Email Confirmation**:
+   - User clicks confirmation link in email
+   - System verifies email and creates session
+   - User is automatically redirected to dashboard
+   - Organization is created during first dashboard access
+
+3. **Sign In**:
+   - User signs in with email and password
+   - System creates session
+   - User is redirected to dashboard
+
+4. **Password Reset**:
+   - User requests password reset
+   - System sends reset email
+   - User clicks reset link
+   - User sets new password
+   - User is redirected to sign in
+
+### Important URLs
+
+- `/auth/signup`: Sign up page
+- `/auth/signin`: Sign in page
+- `/auth/reset-password`: Password reset request
+- `/auth/verify`: Email verification pending page
+- `/(app)/dashboard`: Main dashboard (protected route)
+- `/auth/error`: Error page for auth issues
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

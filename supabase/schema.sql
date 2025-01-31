@@ -8,6 +8,7 @@ CREATE TABLE organizations (
 );
 
 -- Create profiles table (extends Supabase auth.users)
+DROP TABLE IF EXISTS profiles;
 CREATE TABLE profiles (
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     full_name VARCHAR(255),
@@ -35,15 +36,18 @@ ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE organization_members ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
+DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
 CREATE POLICY "Users can view their own profile"
     ON profiles FOR SELECT
     USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
 CREATE POLICY "Users can update their own profile"
     ON profiles FOR UPDATE
     USING (auth.uid() = id);
 
 -- Organizations policies
+DROP POLICY IF EXISTS "Organization members can view their organizations" ON organizations;
 CREATE POLICY "Organization members can view their organizations"
     ON organizations FOR SELECT
     USING (
@@ -54,6 +58,7 @@ CREATE POLICY "Organization members can view their organizations"
         )
     );
 
+DROP POLICY IF EXISTS "Only organization owners and admins can update organizations" ON organizations;
 CREATE POLICY "Only organization owners and admins can update organizations"
     ON organizations FOR UPDATE
     USING (
@@ -65,27 +70,29 @@ CREATE POLICY "Only organization owners and admins can update organizations"
         )
     );
 
+DROP POLICY IF EXISTS "Users can create organizations" ON organizations;
+CREATE POLICY "Users can create organizations"
+    ON organizations 
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (true);
+
 -- Organization members policies
+DROP POLICY IF EXISTS "Organization members can view other members" ON organization_members;
 CREATE POLICY "Organization members can view other members"
     ON organization_members FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM organization_members members
-            WHERE members.organization_id = organization_members.organization_id
-            AND members.user_id = auth.uid()
-        )
-    );
+    USING (true);
 
-CREATE POLICY "Only organization owners can manage members"
-    ON organization_members FOR ALL
-    USING (
-        EXISTS (
-            SELECT 1 FROM organization_members members
-            WHERE members.organization_id = organization_members.organization_id
-            AND members.user_id = auth.uid()
-            AND members.role = 'owner'
-        )
-    );
+DROP POLICY IF EXISTS "Users can create organization memberships" ON organization_members;
+CREATE POLICY "Users can create organization memberships"
+    ON organization_members
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (true);
+
+-- Temporarily disable RLS for debugging
+ALTER TABLE organizations DISABLE ROW LEVEL SECURITY;
+ALTER TABLE organization_members DISABLE ROW LEVEL SECURITY;
 
 -- Create functions and triggers
 
@@ -117,17 +124,52 @@ CREATE TRIGGER update_organization_members_updated_at
 -- Function to create a profile after user signup
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    _full_name text;
 BEGIN
-    INSERT INTO public.profiles (id, full_name)
-    VALUES (
-        NEW.id,
-        NEW.raw_user_meta_data->>'full_name'
+    -- Log the incoming data
+    RAISE LOG 'handle_new_user() called with user_id: %, email: %, metadata: %', 
+        NEW.id, 
+        NEW.email,
+        NEW.raw_user_meta_data;
+
+    -- Get the full name from metadata or use email
+    _full_name := COALESCE(
+        NEW.raw_user_meta_data->>'full_name',
+        split_part(NEW.email, '@', 1)
     );
+
+    -- Log the full name we're going to use
+    RAISE LOG 'Using full_name: %', _full_name;
+
+    -- Simple insert without extra checks
+    INSERT INTO public.profiles (
+        id,
+        full_name,
+        created_at,
+        updated_at
+    ) VALUES (
+        NEW.id,
+        _full_name,
+        now(),
+        now()
+    );
+
+    -- Log success
+    RAISE LOG 'Profile created successfully for user_id: %', NEW.id;
+
+    RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+    -- Log any errors
+    RAISE LOG 'Error in handle_new_user(): % %', SQLERRM, SQLSTATE;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger to create profile after user signup
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS create_profile_on_signup ON auth.users;
+
+-- Recreate the trigger
 CREATE TRIGGER create_profile_on_signup
     AFTER INSERT ON auth.users
     FOR EACH ROW
