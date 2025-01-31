@@ -134,83 +134,81 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="container py-10">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <h1 className="text-2xl font-bold">Loading...</h1>
-          <p className="text-muted-foreground">Please wait while we load your dashboard</p>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <h1 className="text-2xl font-bold">Loading...</h1>
+        <p className="text-muted-foreground">Please wait while we load your dashboard</p>
       </div>
     )
   }
 
   if (!profile || !organization) {
     return (
-      <div className="container py-10">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <h1 className="text-2xl font-bold text-red-600">Error</h1>
-          <p className="text-muted-foreground">Unable to load dashboard data</p>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <h1 className="text-2xl font-bold text-red-600">Error</h1>
+        <p className="text-muted-foreground">Unable to load dashboard data</p>
       </div>
     )
   }
 
   return (
-    <div className="container py-10">
-      <div className="flex flex-col space-y-4 mb-8">
-        <h1 className="text-2xl font-bold">Welcome, {profile.full_name}</h1>
-        <p className="text-muted-foreground">
-          Organization: {organization.name}
-        </p>
-      </div>
+    <div>
+      <div className="flex flex-col space-y-6">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold">Welcome, {profile.full_name}</h1>
+          <p className="text-muted-foreground text-lg">
+            Organization: {organization.name}
+          </p>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profile</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{profile.full_name}</div>
-            <p className="text-xs text-muted-foreground">
-              User Profile
-            </p>
-          </CardContent>
-        </Card>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Profile</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{profile.full_name}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                User Profile
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Organization</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{organization.name}</div>
-            <p className="text-xs text-muted-foreground">
-              {organization.slug}
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Organization</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{organization.name}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {organization.slug}
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Role</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Owner</div>
-            <p className="text-xs text-muted-foreground">
-              Organization Role
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Role</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">Owner</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Organization Role
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">Active</div>
-            <p className="text-xs text-muted-foreground">
-              Account Status
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">Active</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Account Status
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

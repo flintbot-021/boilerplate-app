@@ -166,6 +166,11 @@ The schema will create:
    - If you encounter "Database error saving new user" during signup, ensure you've run the complete schema SQL
    - If tables appear "Not accessible" in tests but exist, this is normal when not authenticated
    - The schema includes error handling to prevent signup failures even if profile creation encounters issues
+   - If you encounter cookie-related authentication issues:
+     - Ensure the cookie name in `src/lib/supabase/client.ts` matches your Supabase project reference: `sb-[reference]-auth-token`
+     - Cookie settings should include: `path: '/'`, `domain: 'localhost'` (in development), and `sameSite: 'lax'`
+     - For Next.js server components, use `cookies()` from `next/headers` with `createServerComponentClient({ cookies: () => cookieStore })`
+     - Clear browser cookies and local storage when testing authentication changes
 
 3. **Testing the Setup**:
    - Visit `/test` to check connection status
