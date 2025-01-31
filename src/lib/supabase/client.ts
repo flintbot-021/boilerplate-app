@@ -11,7 +11,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Create a client that uses cookies by default
 export const supabase = createClientComponentClient({
   cookieOptions: {
-    name: 'sb-auth-token',
+    name: 'sb-wkpludwacfgzfppeeceu-auth-token',
     path: '/',
     domain: 'localhost',
     sameSite: 'lax',

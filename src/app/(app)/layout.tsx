@@ -10,7 +10,8 @@ interface AppLayoutProps {
 
 export default async function AppLayout({ children }: AppLayoutProps) {
   console.log('🔒 Checking session in app layout...')
-  const supabase = createServerComponentClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerComponentClient({ cookies: () => cookieStore })
   const { data: { session }, error } = await supabase.auth.getSession()
 
   if (error) {

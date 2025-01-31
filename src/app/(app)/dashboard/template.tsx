@@ -8,7 +8,8 @@ export default async function DashboardTemplate({
   children: React.ReactNode
 }) {
   console.log('🔒 Checking session in dashboard template...')
-  const supabase = createServerComponentClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerComponentClient({ cookies: () => cookieStore })
   const { data: { session }, error } = await supabase.auth.getSession()
 
   if (error) {

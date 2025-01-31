@@ -46,6 +46,7 @@ export default function DashboardPage() {
         }
 
         // Get profile
+        console.log('Fetching profile for user:', user.id)
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -53,12 +54,19 @@ export default function DashboardPage() {
           .single()
 
         if (profileError) {
-          console.error('Profile fetch error:', profileError)
+          console.error('Profile fetch error:', {
+            error: profileError,
+            message: profileError.message,
+            details: profileError.details,
+            hint: profileError.hint
+          })
           throw profileError
         }
         
+        console.log('Profile data:', profileData)
+        
         if (!profileData) {
-          console.error('No profile found')
+          console.log('No profile found, creating new profile for user:', user.id)
           // Create profile if it doesn't exist
           const { error: createProfileError } = await supabase
             .from('profiles')
