@@ -282,3 +282,69 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Important Notes
+
+### Supabase Client Implementation
+
+This project uses a custom Supabase client implementation that's compatible with Next.js 15's asynchronous cookies API. The implementation can be found in `src/lib/supabase/server.ts` and uses the following pattern:
+
+```typescript
+// Server-side Supabase client
+export function createClient() {
+  const cookieStore = cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        async getAll() {
+          return (await cookieStore).getAll()
+        },
+        async setAll(cookiesToSet) {
+          const resolvedCookiesStore = await cookieStore
+          cookiesToSet.forEach(({ name, value, options }) =>
+            resolvedCookiesStore.set(name, value, options)
+          )
+        }
+      }
+    }
+  )
+}
+```
+
+### Usage in Components
+
+The Supabase client can be used in both server and client components:
+
+#### Server Components
+```typescript
+// In server components
+const supabase = createClient()
+const { data } = await supabase.from('your_table').select()
+```
+
+#### Client Components
+```typescript
+// In client components
+'use client'
+import { useSupabase } from '@/app/supabase-provider'
+
+export default function ClientComponent() {
+  const supabase = useSupabase()
+  // Use supabase client here
+}
+```
+
+## Development
+
+```bash
+npm run dev
+```
+
+## Production
+
+```bash
+npm run build
+npm start
+```
