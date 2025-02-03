@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -29,6 +29,7 @@ export function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
+  const supabase = createClient()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,64 +42,14 @@ export function SignInForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true)
-      console.log('🚀 Starting sign in process...', { email: values.email })
 
-      // Attempt to sign in
-      console.log('📝 Attempting to sign in with Supabase...')
-      const { error: signInError, data: signInData } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       })
 
-      if (signInError) {
-        console.log('❌ Sign in error:', {
-          message: signInError.message,
-          status: signInError.status,
-          code: signInError.code
-        })
-        throw signInError
-      }
+      if (error) throw error
 
-      if (!signInData.user) {
-        console.log('❌ No user data returned')
-        throw new Error('No user data returned')
-      }
-
-      console.log('✅ Sign in successful:', {
-        user: signInData.user.id,
-        email: signInData.user.email,
-        emailConfirmed: signInData.user.email_confirmed_at,
-        lastSignIn: signInData.user.last_sign_in_at
-      })
-
-      // Wait a moment for the session to be fully established
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // Verify session
-      console.log('📝 Getting current session...')
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-      
-      if (sessionError) {
-        console.log('❌ Session error:', {
-          message: sessionError.message,
-          status: sessionError.status,
-          code: sessionError.code
-        })
-        throw sessionError
-      }
-
-      if (!session) {
-        console.log('❌ No session found after sign in')
-        throw new Error('No session found after sign in')
-      }
-
-      console.log('✅ Session confirmed:', {
-        user: session.user.id,
-        expires: session.expires_at,
-        provider: session.user.app_metadata.provider
-      })
-
-      // Show success message
       toast({
         title: 'Success',
         description: 'Signed in successfully.',
@@ -106,25 +57,10 @@ export function SignInForm() {
 
       // Get the redirect URL from search params or default to dashboard
       const redirectTo = searchParams.get('redirectTo') || '/dashboard'
-      console.log('🚀 Redirecting to:', redirectTo)
 
-      // Wait a moment for cookies to be set
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Use window.location for a full page reload to ensure cookies are properly set
-      console.log('📝 Performing full page reload to:', redirectTo)
-      window.location.href = redirectTo
+      // Use router.push for client-side navigation
+      router.push(redirectTo)
     } catch (error: any) {
-      console.log('❌ SIGNIN PROCESS FAILED:', {
-        message: error?.message,
-        code: error?.code,
-        details: error?.details,
-        hint: error?.hint,
-        status: error?.status,
-        name: error?.name,
-        stack: error?.stack
-      })
-      
       toast({
         title: 'Error',
         description: error?.message || 'Invalid email or password',

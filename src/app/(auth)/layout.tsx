@@ -1,19 +1,19 @@
 import { ReactNode } from 'react'
 import { cookies } from 'next/headers'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
 interface AuthLayoutProps {
   children: ReactNode
 }
 
 export default async function AuthLayout({ children }: AuthLayoutProps) {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { session } } = await supabase.auth.getSession()
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   // If user is already authenticated and tries to access auth pages,
   // redirect them to dashboard
-  if (session) {
+  if (user) {
     redirect('/dashboard')
   }
 

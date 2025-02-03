@@ -32,7 +32,7 @@ npm install next@latest react@latest react-dom@latest
 
 ### Authentication & Database
 ```bash
-npm install @supabase/auth-helpers-nextjs @supabase/supabase-js
+npm install @supabase/ssr @supabase/supabase-js
 ```
 
 ### UI & Components
@@ -68,7 +68,7 @@ npm install openai # For AI integration
 
 ### Complete Installation Command
 ```bash
-npm install next@latest react@latest react-dom@latest @supabase/auth-helpers-nextjs @supabase/supabase-js @radix-ui/react-avatar @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label @radix-ui/react-slot @radix-ui/react-toast class-variance-authority clsx tailwind-merge tailwindcss-animate lucide-react @hookform/resolvers react-hook-form zod tailwindcss postcss autoprefixer @tailwindcss/typography @resend/node resend posthog-js openai && npm install -D typescript @types/node @types/react @types/react-dom eslint eslint-config-next prettier prettier-plugin-tailwindcss
+npm install next@latest react@latest react-dom@latest @supabase/ssr @supabase/supabase-js @radix-ui/react-avatar @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-label @radix-ui/react-slot @radix-ui/react-toast class-variance-authority clsx tailwind-merge tailwindcss-animate lucide-react @hookform/resolvers react-hook-form zod tailwindcss postcss autoprefixer @tailwindcss/typography @resend/node resend posthog-js openai && npm install -D typescript @types/node @types/react @types/react-dom eslint eslint-config-next prettier prettier-plugin-tailwindcss
 ```
 
 ## Getting Started
@@ -240,13 +240,14 @@ The schema will create:
 
 2. **Email Confirmation**:
    - User clicks confirmation link in email
-   - System verifies email and creates session
+   - System verifies email through the `/auth/callback` route
    - User is automatically redirected to dashboard
    - Organization is created during first dashboard access
 
 3. **Sign In**:
    - User signs in with email and password
-   - System creates session
+   - System creates session using the new Supabase SSR package
+   - Cookies are automatically handled by the middleware
    - User is redirected to dashboard
 
 4. **Password Reset**:
@@ -256,14 +257,23 @@ The schema will create:
    - User sets new password
    - User is redirected to sign in
 
+### Important Notes
+
+- The authentication system uses the new `@supabase/ssr` package for better integration with Next.js App Router
+- Session management is handled automatically by middleware
+- Cookie management is implemented in both client and server environments
+- Auth state is checked in middleware, layouts, and protected routes
+- Email verification and password reset use the `/auth/callback` route handler
+
 ### Important URLs
 
 - `/auth/signup`: Sign up page
 - `/auth/signin`: Sign in page
 - `/auth/reset-password`: Password reset request
 - `/auth/verify`: Email verification pending page
-- `/(app)/dashboard`: Main dashboard (protected route)
+- `/auth/callback`: Auth callback handler for email verification and OAuth
 - `/auth/error`: Error page for auth issues
+- `/(app)/dashboard`: Main dashboard (protected route)
 
 ## Contributing
 

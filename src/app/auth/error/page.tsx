@@ -1,37 +1,22 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export default function AuthErrorPage() {
-  const searchParams = useSearchParams()
-  const error = searchParams.get('error')
-
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Authentication Error
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {error || 'An error occurred during authentication'}
-          </p>
-        </div>
-
-        <div className="grid gap-4">
-          <Button asChild>
-            <Link href="/auth/signin">
-              Return to Sign In
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/">
-              Return Home
-            </Link>
-          </Button>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+      <h1 className="text-2xl font-bold text-red-600">Authentication Error</h1>
+      <p className="text-muted-foreground text-center max-w-md">
+        There was a problem with the authentication process. This could be due to an expired or invalid link.
+      </p>
+      <div className="flex gap-4">
+        <Button asChild>
+          <Link href="/auth/signin">Sign In</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="/auth/signup">Sign Up</Link>
+        </Button>
       </div>
     </div>
   )
