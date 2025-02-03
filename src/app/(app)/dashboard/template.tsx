@@ -1,36 +1,20 @@
 import { cookies } from 'next/headers'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function DashboardTemplate({
   children,
 }: {
   children: React.ReactNode
 }) {
-  console.log('🔒 Checking session in dashboard template...')
   const cookieStore = cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
-  const { data: { session }, error } = await supabase.auth.getSession()
+  const supabase = createClient()
 
-  if (error) {
-    console.error('❌ Error checking session:', {
-      message: error.message,
-      status: error.status,
-      code: error.code
-    })
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  if (error || !user) {
     redirect('/auth/signin')
   }
-
-  if (!session) {
-    console.log('❌ No session found in dashboard template, redirecting to signin')
-    redirect('/auth/signin')
-  }
-
-  console.log('✅ Session valid in dashboard template:', {
-    user: session.user.id,
-    email: session.user.email,
-    expires: session.expires_at
-  })
 
   return <>{children}</>
 } 
