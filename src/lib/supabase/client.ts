@@ -14,12 +14,14 @@ export function createClient() {
     {
       cookies: {
         get(name: string) {
+          if (typeof document === 'undefined') return ''
           const cookie = document.cookie
             .split('; ')
             .find((row) => row.startsWith(`${name}=`))
           return cookie ? cookie.split('=')[1] : ''
         },
         set(name: string, value: string, options: any) {
+          if (typeof document === 'undefined') return
           document.cookie = `${name}=${value}; path=${options.path ?? '/'
             }; max-age=${options.maxAge ?? 315360000
             }; SameSite=${options.sameSite ?? 'Lax'
@@ -27,6 +29,7 @@ export function createClient() {
             }${options.domain ? `; domain=${options.domain}` : ''}`
         },
         remove(name: string, options: any) {
+          if (typeof document === 'undefined') return
           document.cookie = `${name}=; path=${options.path ?? '/'
             }; expires=Thu, 01 Jan 1970 00:00:00 GMT${options.domain ? `; domain=${options.domain}` : ''
             }`

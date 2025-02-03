@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { cookies } from 'next/headers'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { SignInForm } from '@/features/auth/components/sign-in-form'
 
 export const metadata: Metadata = {
@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 }
 
 export default async function SignInPage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { session } } = await supabase.auth.getSession()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   // If user is already authenticated, redirect to dashboard
-  if (session) {
+  if (user) {
     redirect('/dashboard')
   }
 

@@ -1,45 +1,34 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Analytics } from '@vercel/analytics/react';
+import { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
 import { PostHogProvider } from './providers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: {
-    default: process.env.NEXT_PUBLIC_APP_NAME || 'Next.js Boilerplate',
-    template: '%s | Next.js Boilerplate',
-  },
-  description: 'A production-ready Next.js boilerplate with authentication, organizations, and more.',
+  title: process.env.NEXT_PUBLIC_APP_NAME,
+  description: 'Next.js boilerplate with authentication and essential SaaS tools',
 };
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  const supabase = createServerComponentClient({ cookies });
-  const { data: { session } } = await supabase.auth.getSession();
+}) {
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
         <PostHogProvider>
           {children}
           <Toaster />
-          <Analytics />
         </PostHogProvider>
       </body>
     </html>

@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
-import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 interface Profile {
   id: string
@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const router = useRouter()
 
@@ -46,7 +46,6 @@ export default function DashboardPage() {
         }
 
         // Get profile
-        console.log('Fetching profile for user:', user.id)
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -54,19 +53,11 @@ export default function DashboardPage() {
           .single()
 
         if (profileError) {
-          console.error('Profile fetch error:', {
-            error: profileError,
-            message: profileError.message,
-            details: profileError.details,
-            hint: profileError.hint
-          })
+          console.error('Profile fetch error:', profileError)
           throw profileError
         }
         
-        console.log('Profile data:', profileData)
-        
         if (!profileData) {
-          console.log('No profile found, creating new profile for user:', user.id)
           // Create profile if it doesn't exist
           const { error: createProfileError } = await supabase
             .from('profiles')
